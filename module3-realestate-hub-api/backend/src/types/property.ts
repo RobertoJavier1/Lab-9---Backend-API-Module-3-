@@ -142,3 +142,31 @@ export interface ApiErrorResponse {
  * Unión de respuestas posibles.
  */
 export type ApiResult<T> = ApiResponse<T> | ApiErrorResponse;
+
+// =============================================================================
+// TIPOS PARA Paginacion
+// =============================================================================
+export interface PaginationParams{
+  //pagina actual
+  page:number;
+  //resultados por pagina
+  limit: number
+}
+
+export interface PaginationMeta{
+  //total de registros que coindicen con los filtros
+  total:number;
+  //pagina actual
+  page:number;
+  //resultados por pagina
+  limit:number;
+  //total de paginas
+  pages:number;
+}
+
+//respuesta paginada generica
+export interface PaginatedResponse<T>{
+  succes: true;
+  data: T[];
+  meta: PaginationMeta;
+}
