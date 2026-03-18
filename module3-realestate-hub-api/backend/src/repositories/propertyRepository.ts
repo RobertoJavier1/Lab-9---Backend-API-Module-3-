@@ -26,7 +26,7 @@
 
 import { PrismaClient } from '@prisma/client';
 import { PrismaBetterSqlite3 } from '@prisma/adapter-better-sqlite3';
-import type { Property, PropertyFilters, CreatePropertyInput, UpdatePropertyInput } from '../types/property.js';
+import type { Property, PropertyFilters, CreatePropertyInput, UpdatePropertyInput, PaginationParams, PaginationMeta } from '../types/property.js';
 
 // =============================================================================
 // CLIENTE PRISMA (Singleton con Adapter para Prisma 7)
@@ -131,6 +131,44 @@ export const propertyRepository = {
 
     return properties.map(toProperty);
   },
+
+  
+  //Busca propiedades con filtros Y paginacion
+  //Devuelve los datos de la pagina actual + metadata
+  async findAllPaginated(
+    filters: PropertyFilters,
+    pagination: PaginationParams
+  ): Promise<{ properties: Property[]; meta: PaginationMeta }> {
+    const where = buildWhereClause(filters);
+    const { page, limit } = pagination;
+    //cuantos registros saltar antes de traer la pagina actual
+    //pagina 1 = skip 0, pagina 2 = skip 10...
+    const skip = (page - 1) * limit; 
+
+    //Se ejecutan ambas queries en paralelo
+    const [total, properties] = await Promise.all([
+      prisma.property.count({ where }),
+      prisma.property.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take: limit,
+      }),
+    ]);
+
+    const meta: PaginationMeta = {
+      total,
+      page,
+      limit,
+      pages: Math.ceil(total / limit),
+    };
+
+    return {
+      properties: properties.map(toProperty),
+      meta,
+    };
+  },
+
 
   /**
    * Busca una propiedad por ID.
