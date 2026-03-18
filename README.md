@@ -6,7 +6,7 @@
 
 Se modificó el endpoint `GET /api/properties` para aceptar los parámetros `page` y `limit`, retornando un subconjunto de propiedades junto con metadata (total de registros, total de páginas y página actual).
 
-**Video explicativo:** 
+**Video explicativo:** https://youtu.be/S_YhD77hcKg
 
 ### Definition of Done
 
