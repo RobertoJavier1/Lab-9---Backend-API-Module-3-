@@ -35,7 +35,7 @@ import { propertyRepository } from '../repositories/propertyRepository.js';
 
 export async function getAllProperties(req: Request, res: Response): Promise<void> {
   try {
-    // Extraemos filtros de los query params
+    //Extraemos los filtros de los query params
     const filters: PropertyFilters = {
       search: req.query.search as string | undefined,
       propertyType: req.query.propertyType as PropertyFilters['propertyType'],
@@ -46,12 +46,28 @@ export async function getAllProperties(req: Request, res: Response): Promise<voi
       city: req.query.city as string | undefined,
     };
 
-    // Delegamos al repositorio
-    const properties = await propertyRepository.findAll(filters);
+    //Extraemos y validamos los parametros de paginacion
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
+
+    //Validamos que sean numeros validos
+    if (isNaN(page) || isNaN(limit)) {
+      res.status(400).json({
+        success: false,
+        error: {
+          message: 'Los parámetros page y limit deben ser números válidos',
+          code: 'VALIDATION_ERROR',
+        },
+      });
+      return;
+    }
+
+    const { properties, meta } = await propertyRepository.findAllPaginated(filters, { page, limit });
 
     res.json({
       success: true,
       data: properties,
+      meta,
     });
   } catch (error) {
     console.error('Error al obtener propiedades:', error);
@@ -64,7 +80,6 @@ export async function getAllProperties(req: Request, res: Response): Promise<voi
     });
   }
 }
-
 // =============================================================================
 // GET /api/properties/:id - Obtener una propiedad por ID
 // =============================================================================
