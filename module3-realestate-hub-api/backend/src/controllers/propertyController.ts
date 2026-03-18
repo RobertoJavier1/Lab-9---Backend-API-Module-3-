@@ -46,16 +46,31 @@ export async function getAllProperties(req: Request, res: Response): Promise<voi
       city: req.query.city as string | undefined,
     };
 
-    //Extraemos y validamos los parametros de paginacion
-    const page = Math.max(1, Number(req.query.page) || 1);
-    const limit = Math.min(100, Math.max(1, Number(req.query.limit) || 10));
+    //Extraemos los parametros
+    const rawPage = req.query.page;
+    const rawLimit = req.query.limit;
 
-    //Validamos que sean numeros validos
-    if (isNaN(page) || isNaN(limit)) {
+    const page = rawPage !== undefined ? Number(rawPage) : 1;
+    const limit = rawLimit !== undefined ? Number(rawLimit) : 10;
+
+    //Validamos que sean numeros validos y positivos
+    if (isNaN(page) || isNaN(limit) || page < 1 || limit < 1) {
       res.status(400).json({
         success: false,
         error: {
-          message: 'Los parámetros page y limit deben ser números válidos',
+          message: 'Los parámetros page y limit deben ser números enteros positivos',
+          code: 'VALIDATION_ERROR',
+        },
+      });
+      return;
+    }
+
+    //Limitamos el maximo de resultados por pagina
+    if (limit > 100) {
+      res.status(400).json({
+        success: false,
+        error: {
+          message: 'El límite máximo es 100',
           code: 'VALIDATION_ERROR',
         },
       });
