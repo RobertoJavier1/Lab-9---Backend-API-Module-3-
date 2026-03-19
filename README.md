@@ -8,6 +8,9 @@ Se modificó el endpoint `GET /api/properties` para aceptar los parámetros `pag
 
 **Video explicativo:** https://youtu.be/S_YhD77hcKg
 
+> **Nota:** Probado en Brave Browser.
+> Para instalar dependencias del backend usar: `npm install --legacy-peer-deps`
+
 ### Definition of Done
 
 | Criterio | Descripción | Estado |
